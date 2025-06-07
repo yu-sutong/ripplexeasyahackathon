@@ -239,6 +239,26 @@ app.post('/api/send-cashback', async (req, res) => {
     }
 });
 
+// Merchant API endpoints (placeholder for future expansion)
+app.get('/api/merchant/dashboard', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            totalSales: 2450.00,
+            cashbackDistributed: 122.50,
+            escrowBalance: 500,
+            products: [
+                { id: 1, name: 'Nike Air Max 270', cashbackRate: 5 },
+                { id: 2, name: 'Adidas Ultraboost', cashbackRate: 3 }
+            ],
+            payouts: [
+                { id: 1, amount: -5.00, timestamp: new Date(), product: 'Nike Air Max 270' },
+                { id: 2, amount: -3.50, timestamp: new Date(), product: 'Adidas Ultraboost' }
+            ]
+        }
+    });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({
@@ -270,6 +290,7 @@ async function startServer() {
             console.log('📱 Open your browser and navigate to http://localhost:3000');
             console.log('💡 Ready for instant XRP cashback demonstrations!');
             console.log('🎯 Perfect for Ripple Hackathon showcase!');
+            console.log('👤 Choose between Shopper and Merchant modes on the landing page');
         });
         
     } catch (error) {
