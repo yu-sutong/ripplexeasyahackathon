@@ -71,9 +71,8 @@ Riwards is built for the EasyA x Ripple APEX Hackathon, this MVP demonstrates ho
 
 * 🧪 **XRPL Testnet Explorer**: [https://testnet.xrpl.org/](https://testnet.xrpl.org/)
 * 🌐 **Live Demo Website**: 
-* 🧑‍💻 **Source Code**: 
 * 📽️ **Demo Video**: 
-* 🧵 **Twitter Thread**: 
+* 🧵 **Twitter Thread**: https://x.com/ChaiAndTweet/status/1931555436458856614
 
 ---
 
