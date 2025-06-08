@@ -87,6 +87,7 @@ function showShopperPage() {
     setTimeout(() => {
         showStatus('✅ Ready for instant XRP cashback rewards!', 'success');
         validatePaymentForm();
+        updateHistoryDisplay(); // Initialize blank history display
     }, 100);
 }
 
@@ -551,19 +552,20 @@ function addToCashbackHistory(amount, txHash, productName = 'Unknown Product') {
     updateHistoryDisplay();
 }
 
-// Update history display
+// Update history display - MODIFIED to show blank initially
 function updateHistoryDisplay() {
     const historyContainer = document.getElementById('cashbackHistory');
     if (!historyContainer) return;
     
     if (cashbackHistory.length === 0) {
+        // Show empty state message instead of demo transaction
         historyContainer.innerHTML = `
-            <div class="history-item">
-                <div>
-                    <div><strong>Nike Air Max 270</strong></div>
-                    <div class="timestamp">Demo transaction - Make a purchase to see real history</div>
+            <div class="empty-history">
+                <div style="text-align: center; color: #6c757d; padding: 40px 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📈</div>
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;">No cashback history yet</div>
+                    <div style="font-size: 0.9rem;">Complete a purchase to see your XRP cashback transactions here</div>
                 </div>
-                <div class="amount">+$5.00 XRP</div>
             </div>
         `;
         return;

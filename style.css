@@ -513,6 +513,20 @@ input:focus {
     font-size: 0.9rem;
 }
 
+/* Empty History State Styles */
+.empty-history {
+    background: #f8f9fa;
+    border-radius: 15px;
+    margin: 10px 0;
+    border: 2px dashed #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.empty-history:hover {
+    border-color: #adb5bd;
+    background: #f1f3f4;
+}
+
 .loading-spinner {
     display: inline-block;
     width: 20px;
