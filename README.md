@@ -1,7 +1,7 @@
 # 💸 RiWards
 
 **Revolutionizing cashback rewards with instant, transparent blockchain payments.**
-Riwards is built for the Ripple Hackathon, this MVP demonstrates how the XRP Ledger can power real-time cashback for online shopping experiences.
+Riwards is built for the EasyA x Ripple APEX Hackathon, this MVP demonstrates how the XRP Ledger can power real-time cashback for online shopping experiences.
 
 ---
 
@@ -95,10 +95,7 @@ Riwards is built for the Ripple Hackathon, this MVP demonstrates how the XRP Led
 ---
 
 ### 🙌 Team & Credits
+Built by [Add your names please]
 
-Built by 
-For the **Ripple Hackathon 2025**
+For the **EasyA x Ripple APEX Ripple Hackathon 2025**
 
----
-
-Would you like help generating the demo frontend, smart contract calls, or deploying it?
