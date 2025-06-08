@@ -95,7 +95,12 @@ Riwards is built for the EasyA x Ripple APEX Hackathon, this MVP demonstrates ho
 ---
 
 ### 🙌 Team & Credits
-Built by [Add your names please]
+Built by
+* Yu Sutong
+* Aung Ye Thant Hein
+* Saai
+* Jonathan
+* Lim Kai Xuan
 
 For the **EasyA x Ripple APEX Ripple Hackathon 2025**
 
