@@ -1,7 +1,15 @@
 let client;
 let currentWallet;
+let merchantEscrowWallet;
+let commissionWallet;
 let cashbackHistory = [];
 let selectedProduct = null;
+let escrowBalance = 0;
+let escrowLockTime = 0;
+
+// Commission settings
+const COMMISSION_RATE = 0.02; // 2% commission on all transactions
+const COMMISSION_ADDRESS = "rCommissionWallet1234567890"; // Demo commission wallet
 
 // Product selection functionality
 function selectProduct(button) {
@@ -52,11 +60,13 @@ function updateOrderSummary() {
     
     const tax = (selectedProduct.price * 0.085).toFixed(2); // 8.5% tax
     const shipping = 5.99;
+    const commission = (selectedProduct.price * COMMISSION_RATE).toFixed(2);
     const total = (selectedProduct.price + parseFloat(tax) + shipping).toFixed(2);
     
     document.getElementById('orderProductName').textContent = selectedProduct.name;
     document.getElementById('orderProductPrice').textContent = `${selectedProduct.price.toFixed(2)}`;
     document.getElementById('orderTax').textContent = `${tax}`;
+    document.getElementById('orderCommission').textContent = `${commission}`;
     document.getElementById('orderTotal').textContent = `${total}`;
 }
 
@@ -95,6 +105,12 @@ function showMerchantPage() {
     document.getElementById('landingPage').style.display = 'none';
     document.getElementById('shopperPage').style.display = 'none';
     document.getElementById('merchantPage').style.display = 'block';
+    
+    // Initialize merchant-specific functionality
+    setTimeout(() => {
+        initializeMerchantEscrow();
+        updateEscrowDisplay();
+    }, 100);
 }
 
 // Check for existing role on page load
@@ -107,18 +123,181 @@ function checkExistingRole() {
     const savedRole = localStorage.getItem('userRole');
     if (savedRole) {
         console.log(`Previous role found: ${savedRole}`);
-        // You could add a "Continue as Shopper/Merchant" button here if desired
     }
 }
 
-// Merchant Functions
+// Merchant Escrow Functions
+async function initializeMerchantEscrow() {
+    try {
+        showMerchantStatus('🔐 Initializing merchant escrow account...', 'loading');
+        
+        const response = await fetch('/api/merchant/initialize-escrow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            merchantEscrowWallet = data.escrowWallet;
+            escrowBalance = data.balance || 0;
+            escrowLockTime = data.lockTime || 0;
+            
+            showMerchantStatus('✅ Merchant escrow account initialized!', 'success');
+            updateEscrowDisplay();
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error('Error initializing escrow:', error);
+        // Demo fallback
+        merchantEscrowWallet = {
+            address: 'rMerchantEscrow1234567890',
+            balance: 500
+        };
+        escrowBalance = 500;
+        escrowLockTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours from now
+        showMerchantStatus('✅ Demo escrow account ready!', 'success');
+        updateEscrowDisplay();
+    }
+}
+
+function updateEscrowDisplay() {
+    const escrowBalanceEl = document.getElementById('escrowBalance');
+    const escrowAddressEl = document.getElementById('escrowAddress');
+    const escrowLockTimeEl = document.getElementById('escrowLockTime');
+    const escrowStatusEl = document.getElementById('escrowStatus');
+    
+    if (escrowBalanceEl) escrowBalanceEl.textContent = `${escrowBalance} XRP`;
+    if (escrowAddressEl) escrowAddressEl.textContent = merchantEscrowWallet?.address || 'Not initialized';
+    
+    // Calculate and display lock time
+    if (escrowLockTime > Date.now()) {
+        const timeLeft = new Date(escrowLockTime - Date.now());
+        const hours = Math.floor(timeLeft.getTime() / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft.getTime() % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (escrowLockTimeEl) escrowLockTimeEl.textContent = `${hours}h ${minutes}m remaining`;
+        if (escrowStatusEl) {
+            escrowStatusEl.innerHTML = '🔒 <strong>LOCKED</strong> - Funds secured in time-locked escrow';
+            escrowStatusEl.className = 'escrow-status locked';
+        }
+    } else {
+        if (escrowLockTimeEl) escrowLockTimeEl.textContent = 'Unlocked';
+        if (escrowStatusEl) {
+            escrowStatusEl.innerHTML = '🔓 <strong>UNLOCKED</strong> - Funds available for withdrawal';
+            escrowStatusEl.className = 'escrow-status unlocked';
+        }
+    }
+}
+
+async function addFundsToEscrow() {
+    const amount = prompt('Enter amount to add to escrow (XRP):');
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+    
+    try {
+        showMerchantStatus('💰 Adding funds to escrow...', 'loading');
+        
+        const response = await fetch('/api/merchant/add-escrow-funds', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: parseFloat(amount),
+                lockHours: 24 // Lock for 24 hours
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            escrowBalance += parseFloat(amount);
+            escrowLockTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+            updateEscrowDisplay();
+            showMerchantStatus(`✅ Added ${amount} XRP to escrow with 24h lock!`, 'success');
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error('Error adding escrow funds:', error);
+        // Demo success
+        escrowBalance += parseFloat(amount);
+        escrowLockTime = Date.now() + (24 * 60 * 60 * 1000);
+        updateEscrowDisplay();
+        showMerchantStatus(`✅ Demo: Added ${amount} XRP to escrow!`, 'success');
+    }
+}
+
+async function withdrawFromEscrow() {
+    if (escrowLockTime > Date.now()) {
+        alert('Cannot withdraw: Funds are still locked in escrow!');
+        return;
+    }
+    
+    const amount = prompt(`Enter amount to withdraw (Available: ${escrowBalance} XRP):`);
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0 || parseFloat(amount) > escrowBalance) {
+        alert('Please enter a valid amount within available balance');
+        return;
+    }
+    
+    try {
+        showMerchantStatus('💸 Processing withdrawal...', 'loading');
+        
+        escrowBalance -= parseFloat(amount);
+        updateEscrowDisplay();
+        showMerchantStatus(`✅ Withdrew ${amount} XRP from escrow!`, 'success');
+    } catch (error) {
+        console.error('Error withdrawing from escrow:', error);
+        showMerchantStatus('❌ Withdrawal failed', 'error');
+    }
+}
+
+// Commission Account Functions
+async function initializeCommissionAccount() {
+    try {
+        const response = await fetch('/api/commission/initialize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            commissionWallet = data.commissionWallet;
+            console.log('Commission account initialized:', commissionWallet.address);
+        }
+    } catch (error) {
+        console.error('Error initializing commission account:', error);
+        // Demo fallback
+        commissionWallet = {
+            address: COMMISSION_ADDRESS,
+            balance: 0
+        };
+    }
+}
+
+// Enhanced product management with commission
 let products = [
     { name: 'Nike Air Max 270', price: 100, cashback: 5 },
-    { name: 'Adidas Ultraboost', price: 120, cashback: 3 }
+    { name: 'Apple AirPods Pro', price: 249, cashback: 8 },
+    { name: 'Samsung Galaxy Watch', price: 329.99, cashback: 6 },
+    { name: 'MacBook Air M2', price: 1199, cashback: 4 },
+    { name: 'Sony WH-1000XM5', price: 399.99, cashback: 7 },
+    { name: 'iPhone 15 Pro', price: 999, cashback: 3 },
+    { name: 'Nintendo Switch OLED', price: 349.99, cashback: 5 },
+    { name: 'Adidas Ultraboost 22', price: 180, cashback: 6 }
 ];
 
 function addFunds() {
-    alert('Add Funds functionality - Connect to XRPL for escrow deposits');
+    addFundsToEscrow();
 }
 
 function showAddProductForm() {
@@ -211,20 +390,7 @@ function updateCashbackRate(input, productName) {
         console.log(`Updated ${productName} cashback rate to ${newRate}%`);
         
         // Show confirmation
-        const notification = document.createElement('div');
-        notification.className = 'status success';
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '1000';
-        notification.innerHTML = `✅ ${productName} cashback updated to ${newRate}%`;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 3000);
+        showMerchantStatus(`✅ ${productName} cashback updated to ${newRate}%`, 'success');
     }
 }
 
@@ -342,7 +508,7 @@ function setupEventListeners() {
     }
 }
 
-// Process payment and send cashback
+// Enhanced payment processing with commission
 async function processPayment() {
     if (!selectedProduct) {
         showStatus('Please select a product first!', 'error');
@@ -361,11 +527,11 @@ async function processPayment() {
         showStatus('💳 Processing your payment...', 'loading');
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        showStatus('✅ Payment successful! Sending instant cashback...', 'loading');
+        showStatus('✅ Payment successful! Processing cashback & commission...', 'loading');
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Send cashback payment
-        await sendCashback(walletAddress);
+        // Send cashback payment and commission
+        await sendCashbackWithCommission(walletAddress);
         
     } catch (error) {
         console.error('Payment error:', error);
@@ -387,6 +553,9 @@ async function initializeXRPL() {
         client = new xrpl.Client('wss://s.altnet.rippletest.net:51233');
         await client.connect();
         console.log('Connected to XRPL Testnet');
+        
+        // Initialize commission account
+        await initializeCommissionAccount();
     } catch (error) {
         console.error('Failed to connect to XRPL:', error);
         showStatus('Failed to connect to XRP Ledger', 'error');
@@ -478,58 +647,96 @@ async function checkBalance(address) {
     }
 }
 
-// Send cashback payment
-async function sendCashback(destinationAddress) {
+// Enhanced cashback with commission processing
+async function sendCashbackWithCommission(destinationAddress) {
     try {
         if (!selectedProduct) {
             throw new Error('No product selected');
         }
         
-        const response = await fetch('/api/send-cashback', {
+        const commissionAmount = (selectedProduct.price * COMMISSION_RATE).toFixed(2);
+        
+        const response = await fetch('/api/send-cashback-with-commission', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 destination: destinationAddress,
-                amount: selectedProduct.cashbackAmount.toString(),
-                product: selectedProduct.name
+                cashbackAmount: selectedProduct.cashbackAmount.toString(),
+                commissionAmount: commissionAmount,
+                product: selectedProduct.name,
+                productPrice: selectedProduct.price
             })
         });
 
         const data = await response.json();
         
         if (data.success) {
-            showTransactionSuccess(data.txHash, selectedProduct.cashbackAmount.toString(), destinationAddress);
-            addToCashbackHistory(selectedProduct.cashbackAmount.toString(), data.txHash, selectedProduct.name);
-            showStatus('🎉 Cashback sent successfully! Check your wallet.', 'success');
+            const isReal = data.real === true;
+            const statusMessage = isReal ? 
+                '🎉 Real XRPL transactions successful! Cashback & commission processed.' :
+                '🎉 Demo transactions completed! Valid XRPL hash format generated.';
+            
+            showTransactionSuccess(
+                data.cashbackTxHash, 
+                selectedProduct.cashbackAmount.toString(), 
+                destinationAddress, 
+                data.commissionTxHash, 
+                commissionAmount,
+                isReal
+            );
+            addToCashbackHistory(selectedProduct.cashbackAmount.toString(), data.cashbackTxHash, selectedProduct.name);
+            showStatus(statusMessage, 'success');
+            
+            // Update escrow balance (deduct cashback)
+            if (escrowBalance >= selectedProduct.cashbackAmount) {
+                escrowBalance -= selectedProduct.cashbackAmount;
+                updateEscrowDisplay();
+            }
         } else {
             throw new Error(data.error);
         }
         
     } catch (error) {
         console.error('Cashback error:', error);
-        
-        // Show demo success for fallback
-        const mockTxHash = 'DEMO_' + Math.random().toString(36).substring(2, 15).toUpperCase();
-        showTransactionSuccess(mockTxHash, selectedProduct.cashbackAmount.toString(), destinationAddress);
-        addToCashbackHistory(selectedProduct.cashbackAmount.toString(), mockTxHash, selectedProduct.name);
-        showStatus('🎉 Demo: Cashback transaction simulated successfully!', 'success');
+        showStatus('❌ Transaction failed: ' + error.message, 'error');
     }
 }
 
-// Show transaction success details
-function showTransactionSuccess(txHash, amount, destination) {
+// Enhanced transaction success display
+function showTransactionSuccess(cashbackTxHash, cashbackAmount, destination, commissionTxHash, commissionAmount, isReal = false) {
+    const realBadge = isReal ? 
+        '<span class="real-tx-badge">🟢 REAL XRPL TRANSACTION</span>' : 
+        '<span class="demo-tx-badge">🟡 DEMO TRANSACTION</span>';
+    
     const detailsHtml = `
         <div class="transaction-details">
-            <h3>🎉 Cashback Transaction Successful!</h3>
-            <p><strong>Amount:</strong> ${amount} XRP</p>
-            <p><strong>Destination:</strong> ${destination.substring(0, 20)}...</p>
-            <p><strong>Transaction Hash:</strong></p>
-            <div class="transaction-hash">${txHash}</div>
-            <a href="https://testnet.xrpl.org/transactions/${txHash}" target="_blank" class="explorer-link">
-                🔍 View on XRPL Explorer
-            </a>
+            <h3>🎉 Transaction Successful! ${realBadge}</h3>
+            
+            <div class="transaction-group">
+                <h4>💰 Cashback Payment</h4>
+                <p><strong>Amount:</strong> ${cashbackAmount} XRP</p>
+                <p><strong>Destination:</strong> ${destination.substring(0, 20)}...</p>
+                <p><strong>Transaction Hash:</strong></p>
+                <div class="transaction-hash">${cashbackTxHash}</div>
+                <a href="https://testnet.xrpl.org/transactions/${cashbackTxHash}" target="_blank" class="explorer-link">
+                    🔍 View Cashback on XRPL Explorer
+                </a>
+            </div>
+            
+            <div class="transaction-group">
+                <h4>🏢 Commission Payment</h4>
+                <p><strong>Amount:</strong> ${commissionAmount} XRP (${(COMMISSION_RATE * 100)}%)</p>
+                <p><strong>Destination:</strong> Commission Account</p>
+                <p><strong>Transaction Hash:</strong></p>
+                <div class="transaction-hash">${commissionTxHash}</div>
+                <a href="https://testnet.xrpl.org/transactions/${commissionTxHash}" target="_blank" class="explorer-link">
+                    🔍 View Commission on XRPL Explorer
+                </a>
+            </div>
+            
+            ${!isReal ? '<div class="demo-note">💡 Demo mode: Transactions simulated with valid XRPL hash format for demonstration purposes.</div>' : ''}
         </div>
     `;
     
@@ -537,6 +744,12 @@ function showTransactionSuccess(txHash, amount, destination) {
     if (transactionDetails) {
         transactionDetails.innerHTML = detailsHtml;
     }
+}
+
+// Send cashback payment (legacy function for compatibility)
+async function sendCashback(destinationAddress) {
+    // Redirect to enhanced function
+    return sendCashbackWithCommission(destinationAddress);
 }
 
 // Add transaction to history
@@ -602,10 +815,30 @@ function showStatus(message, type) {
     }
 }
 
+// Show merchant status messages
+function showMerchantStatus(message, type) {
+    const statusDiv = document.getElementById('merchantStatusDisplay');
+    if (statusDiv) {
+        statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        
+        // Auto-clear non-success messages
+        if (type !== 'success') {
+            setTimeout(() => {
+                if (statusDiv.querySelector('.status:not(.success)')) {
+                    statusDiv.innerHTML = '';
+                }
+            }, 5000);
+        }
+    }
+}
+
 // Initialize when page loads
 window.addEventListener('load', async () => {
     checkExistingRole();
     setupEventListeners();
+    
+    // Update escrow display every minute
+    setInterval(updateEscrowDisplay, 60000);
 });
 
 // Add visual effects

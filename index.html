@@ -47,11 +47,11 @@
                 <div class="role-card merchant-card" onclick="selectRole('merchant')">
                     <div class="role-icon">🏪</div>
                     <h3>I'm a Merchant</h3>
-                    <p>Manage your store, set cashback rates, and track sales analytics</p>
+                    <p>Manage your store with time-locked escrow accounts and automated commission handling</p>
                     <div class="role-features">
-                        <div class="feature">✓ Sales dashboard</div>
-                        <div class="feature">✓ Escrow management</div>
-                        <div class="feature">✓ Customizable cashback rates</div>
+                        <div class="feature">✓ Time-locked escrow accounts</div>
+                        <div class="feature">✓ Automated commission processing</div>
+                        <div class="feature">✓ Secure fund management</div>
                     </div>
                     <button class="role-btn">Merchant Dashboard</button>
                 </div>
@@ -194,6 +194,10 @@
                                 <span id="orderTax">$0.00</span>
                             </div>
                             <div class="summary-row">
+                                <span>Commission (2%)</span>
+                                <span id="orderCommission">$0.00</span>
+                            </div>
+                            <div class="summary-row">
                                 <span>Shipping</span>
                                 <span>$5.99</span>
                             </div>
@@ -261,9 +265,16 @@
                     </div>
 
                     <div class="cashback-highlight" style="margin-top: 20px;">
-                        <strong>🎉 You'll receive $5.00 XRP cashback instantly!</strong>
+                        <strong>🎉 Earn instant XRP cashback on every purchase!</strong>
                         <div style="font-size: 0.9rem; margin-top: 5px;">
                             Cashback sent to your wallet within 3-5 seconds
+                        </div>
+                    </div>
+
+                    <div class="commission-info" style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;">
+                        <strong>ℹ️ Platform Commission</strong>
+                        <div style="font-size: 0.9rem; margin-top: 5px; color: #666;">
+                            2% commission automatically processed to platform wallet for each transaction
                         </div>
                     </div>
 
@@ -280,7 +291,7 @@
         </div>
     </div>
 
-    <!-- Merchant Experience -->
+    <!-- Enhanced Merchant Experience with Escrow -->
     <div id="merchantPage" class="page-content" style="display: none;">
         <div class="container">
             <div class="header">
@@ -289,11 +300,91 @@
                     <button class="switch-role-btn" onclick="showLanding()">Switch Role</button>
                 </div>
                 <h1>🚀 XRPCash Merchant Dashboard</h1>
-                <div class="tagline">Manage Your Store & Cashback Programs</div>
+                <div class="tagline">Manage Your Store with Time-Locked Escrow & Commission Processing</div>
             </div>
 
             <div class="merchant-dashboard">
+                <div id="merchantStatusDisplay"></div>
+                
                 <div class="dashboard-grid">
+                    <!-- Enhanced Escrow Management -->
+                    <div class="dashboard-card escrow-card">
+                        <h3>🔐 Time-Locked Escrow Account</h3>
+                        
+                        <div class="escrow-info">
+                            <div class="metric">
+                                <div class="metric-value" id="escrowBalance">0 XRP</div>
+                                <div class="metric-label">Available Escrow Balance</div>
+                            </div>
+                            
+                            <div class="escrow-details">
+                                <div class="escrow-row">
+                                    <span>Escrow Address:</span>
+                                    <span id="escrowAddress" class="address-display">Not initialized</span>
+                                </div>
+                                <div class="escrow-row">
+                                    <span>Lock Time Remaining:</span>
+                                    <span id="escrowLockTime">Calculating...</span>
+                                </div>
+                            </div>
+                            
+                            <div id="escrowStatus" class="escrow-status">🔒 Initializing...</div>
+                        </div>
+
+                        <div class="escrow-actions">
+                            <button class="btn" onclick="addFundsToEscrow()">
+                                💰 Add Funds to Escrow
+                            </button>
+                            <button class="btn-secondary" onclick="withdrawFromEscrow()">
+                                💸 Withdraw (When Unlocked)
+                            </button>
+                        </div>
+
+                        <div class="escrow-explanation">
+                            <h4>How Time-Locked Escrow Works:</h4>
+                            <ul>
+                                <li>🔒 Funds are locked for 24 hours after deposit</li>
+                                <li>⏰ Provides security and prevents immediate withdrawals</li>
+                                <li>💰 Cashback payments are deducted automatically</li>
+                                <li>🔓 Withdraw remaining funds after lock period expires</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Commission Account Overview -->
+                    <div class="dashboard-card commission-card">
+                        <h3>🏢 Commission Account</h3>
+                        
+                        <div class="commission-info">
+                            <div class="metric">
+                                <div class="metric-value">2.0%</div>
+                                <div class="metric-label">Platform Commission Rate</div>
+                            </div>
+                            
+                            <div class="commission-details">
+                                <div class="commission-row">
+                                    <span>Commission Wallet:</span>
+                                    <span class="address-display">rCommissionWallet1234567890</span>
+                                </div>
+                                <div class="commission-row">
+                                    <span>Auto-Processing:</span>
+                                    <span class="status-indicator">✅ Enabled</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="commission-explanation">
+                            <h4>Commission Processing:</h4>
+                            <ul>
+                                <li>💼 2% of each sale goes to platform commission</li>
+                                <li>⚡ Automatically processed with each transaction</li>
+                                <li>📊 Transparent fee structure</li>
+                                <li>🔄 Real-time commission distribution</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Sales Overview -->
                     <div class="dashboard-card">
                         <h3>📊 Sales Overview</h3>
                         <div class="metric">
@@ -304,19 +395,13 @@
                             <div class="metric-value">$122.50</div>
                             <div class="metric-label">Cashback Distributed</div>
                         </div>
-                    </div>
-
-                    <div class="dashboard-card">
-                        <h3>💰 Escrow Balance</h3>
                         <div class="metric">
-                            <div class="metric-value">500 XRP</div>
-                            <div class="metric-label">Available for Cashback</div>
+                            <div class="metric-value">$49.00</div>
+                            <div class="metric-label">Commission Processed</div>
                         </div>
-                        <button class="btn" onclick="addFunds()">
-                            💧 Add Funds to Escrow
-                        </button>
                     </div>
 
+                    <!-- Product Management -->
                     <div class="dashboard-card">
                         <h3>🛍️ Product Management</h3>
                         <div class="product-list" id="productList">
@@ -329,12 +414,12 @@
                                 <button class="delete-product-btn" onclick="deleteProduct(this, 'Nike Air Max 270')">🗑️</button>
                             </div>
                             <div class="product-item">
-                                <span>Adidas Ultraboost</span>
+                                <span>Apple AirPods Pro</span>
                                 <div class="cashback-rate">
                                     <label>Cashback: </label>
-                                    <input type="number" value="3" min="0" max="20" onchange="updateCashbackRate(this, 'Adidas Ultraboost')">%
+                                    <input type="number" value="8" min="0" max="20" onchange="updateCashbackRate(this, 'Apple AirPods Pro')">%
                                 </div>
-                                <button class="delete-product-btn" onclick="deleteProduct(this, 'Adidas Ultraboost')">🗑️</button>
+                                <button class="delete-product-btn" onclick="deleteProduct(this, 'Apple AirPods Pro')">🗑️</button>
                             </div>
                         </div>
                         
@@ -363,22 +448,33 @@
                         </button>
                     </div>
 
+                    <!-- Enhanced Payout History -->
                     <div class="dashboard-card">
-                        <h3>📈 Payout History</h3>
+                        <h3>📈 Transaction History</h3>
                         <div class="payout-history">
                             <div class="payout-item">
                                 <div>
-                                    <strong>Customer Purchase</strong>
+                                    <strong>Cashback Payment</strong>
                                     <div class="timestamp">Today, 2:30 PM</div>
+                                    <div class="transaction-type">Nike Air Max 270</div>
                                 </div>
-                                <div class="amount">-$5.00 XRP</div>
+                                <div class="amount negative">-$5.00 XRP</div>
                             </div>
                             <div class="payout-item">
                                 <div>
-                                    <strong>Customer Purchase</strong>
-                                    <div class="timestamp">Today, 1:15 PM</div>
+                                    <strong>Commission Processed</strong>
+                                    <div class="timestamp">Today, 2:30 PM</div>
+                                    <div class="transaction-type">Platform Fee</div>
                                 </div>
-                                <div class="amount">-$3.50 XRP</div>
+                                <div class="amount commission">$2.00 XRP</div>
+                            </div>
+                            <div class="payout-item">
+                                <div>
+                                    <strong>Escrow Deposit</strong>
+                                    <div class="timestamp">Today, 1:15 PM</div>
+                                    <div class="transaction-type">24h Lock Applied</div>
+                                </div>
+                                <div class="amount positive">+$100.00 XRP</div>
                             </div>
                         </div>
                     </div>

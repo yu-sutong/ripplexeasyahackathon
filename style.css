@@ -448,11 +448,62 @@ input:focus {
     border: 1px solid #bee5eb;
 }
 
+/* Transaction status badges */
+.real-tx-badge {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.demo-tx-badge {
+    background: linear-gradient(45deg, #ffc107, #fd7e14);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.demo-note {
+    background: #fff3cd;
+    color: #856404;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #ffeaa7;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .transaction-details {
     background: #f8f9fa;
     border-radius: 10px;
     padding: 20px;
     margin-top: 20px;
+}
+
+.transaction-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+}
+
+.transaction-group h4 {
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 2px solid #f1f3f4;
+    padding-bottom: 5px;
 }
 
 .transaction-hash {
@@ -462,17 +513,19 @@ input:focus {
     border-radius: 5px;
     font-family: monospace;
     margin: 10px 0;
+    font-size: 0.9rem;
 }
 
 .explorer-link {
     display: inline-block;
     background: #007bff;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 5px;
     text-decoration: none;
     margin-top: 10px;
     transition: background 0.3s ease;
+    font-size: 0.9rem;
 }
 
 .explorer-link:hover {
@@ -622,14 +675,22 @@ input:focus {
     text-align: center;
 }
 
-/* Merchant Dashboard Styles */
+.commission-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+    margin-top: 15px;
+}
+
+/* Enhanced Merchant Dashboard Styles */
 .merchant-dashboard {
     margin-top: 20px;
 }
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 30px;
 }
 
@@ -650,6 +711,153 @@ input:focus {
     color: #333;
     border-bottom: 2px solid #f1f3f4;
     padding-bottom: 10px;
+}
+
+/* Escrow Card Styles */
+.escrow-card {
+    border-left: 5px solid #667eea;
+}
+
+.escrow-info {
+    margin-bottom: 25px;
+}
+
+.escrow-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.escrow-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.escrow-row:last-child {
+    margin-bottom: 0;
+}
+
+.address-display {
+    font-family: monospace;
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.escrow-status {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    margin: 15px 0;
+}
+
+.escrow-status.locked {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.escrow-status.unlocked {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.escrow-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.escrow-actions .btn,
+.escrow-actions .btn-secondary {
+    flex: 1;
+    margin: 0;
+}
+
+.escrow-explanation {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.escrow-explanation h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.escrow-explanation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.escrow-explanation li {
+    margin-bottom: 8px;
+    padding-left: 5px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Commission Card Styles */
+.commission-card {
+    border-left: 5px solid #28a745;
+}
+
+.commission-info {
+    margin-bottom: 25px;
+}
+
+.commission-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.commission-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.commission-row:last-child {
+    margin-bottom: 0;
+}
+
+.status-indicator {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.commission-explanation {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #28a745;
+}
+
+.commission-explanation h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.commission-explanation ul {
+    list-style: none;
+    padding: 0;
+}
+
+.commission-explanation li {
+    margin-bottom: 8px;
+    padding-left: 5px;
+    font-size: 0.9rem;
+    color: #666;
 }
 
 .metric {
@@ -764,7 +972,7 @@ input:focus {
 }
 
 .payout-history {
-    max-height: 200px;
+    max-height: 300px;
     overflow-y: auto;
 }
 
@@ -772,8 +980,13 @@ input:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #e1e5e9;
+    transition: background 0.3s ease;
+}
+
+.payout-item:hover {
+    background: #f8f9fa;
 }
 
 .payout-item:last-child {
@@ -781,7 +994,26 @@ input:focus {
 }
 
 .payout-item .amount {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.payout-item .amount.negative {
     color: #dc3545;
+}
+
+.payout-item .amount.positive {
+    color: #28a745;
+}
+
+.payout-item .amount.commission {
+    color: #667eea;
+}
+
+.transaction-type {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 2px;
 }
 
 /* Responsive Design */
@@ -832,6 +1064,14 @@ input:focus {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
+    
+    .escrow-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 1024px) {
@@ -841,5 +1081,9 @@ input:focus {
     
     .user-info {
         flex-wrap: wrap;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
